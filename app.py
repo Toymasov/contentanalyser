@@ -457,23 +457,39 @@ if df is not None:
             target_indices = links_df['target_col'].map(node_mapping).tolist()
             values = links_df['value'].tolist()
             
-            # Ranglarni belgilash
+            # Ranglarni va tartibini belgilash (x, y koordinatalari bilan)
             node_colors = []
-            for node in all_nodes:
-                if 'Positive' in node: node_colors.append('#659961')
-                elif 'Negative' in node: node_colors.append('#F2930B')
-                elif 'Neutral' in node: node_colors.append('#A6A6A6')
-                else: node_colors.append('#3475B5')
+            x_pos = []
+            y_pos = []
+            for n in all_nodes:
+                if 'Positive' in n: 
+                    node_colors.append('#659961')
+                    x_pos.append(0.99); y_pos.append(0.1)
+                elif 'Neutral' in n: 
+                    node_colors.append('#A6A6A6')
+                    x_pos.append(0.99); y_pos.append(0.5)
+                elif 'Negative' in n: 
+                    node_colors.append('#F2930B')
+                    x_pos.append(0.99); y_pos.append(0.9)
+                elif ' (Manba)' in n: 
+                    node_colors.append('#3475B5')
+                    x_pos.append(0.01); y_pos.append(0.5)
+                else: 
+                    node_colors.append('#3475B5')
+                    x_pos.append(0.5); y_pos.append(0.5)
 
             try:
                 fig_sankey = go.Figure(data=[go.Sankey(
+                    arrangement="snap",
                     textfont=dict(color="black", size=13),
                     node = dict(
                       pad = 20,
                       thickness = 25,
                       line = dict(color = "white", width = 0.5),
                       label = [f"<b>{n.replace(' (Manba)', '').replace(' (Tur)', '').replace(' (Hissiyot)', '')}</b>" for n in all_nodes],
-                      color = node_colors
+                      color = node_colors,
+                      x = x_pos,
+                      y = y_pos
                     ),
                     link = dict(
                       source = source_indices,
@@ -497,7 +513,80 @@ if df is not None:
                 time_df = df.groupby([df['parsed_date'].dt.date, 'news type']).size().reset_index(name='Soni')
                 fig_time = px.line(time_df, x='parsed_date', y='Soni', color='news type', title="Turkumlar Bo'yicha O'sish", markers=True, color_discrete_sequence=['#659961', '#F2930B', '#A6A6A6', '#3475B5', '#D2A14E'])
                 st.plotly_chart(fig_time, use_container_width=True, config=dl_config)
-        if 'content length' in df.columns:
+        if 'content length' in df.columns and 'Source' in df.columns and has_content_sentiment:
+            st.markdown("---")
+            st.subheader("Maqolalar hajmi dinamikasi: Manba → Hajm → Matn Hissiyoti")
+            
+            l_df = df.copy()
+            l_df['Source'] = l_df['Source'].fillna("Noma'lum Manba").astype(str)
+            l_df['content sentiment analyse'] = l_df['content sentiment analyse'].fillna("Noma'lum Hissiyot").astype(str)
+            
+            bins = [-1, 500, 1500, 3000, float('inf')]
+            labels = ['Qisqa (0-500)', "O'rtacha (500-1500)", "Uzun (1500-3000)", "Juda Uzun (3000+)"]
+            l_df['Uzunlik'] = pd.cut(l_df['content length'], bins=bins, labels=labels).astype(str)
+            
+            # 1. Source to Uzunlik
+            src_len = l_df.groupby(['Source', 'Uzunlik']).size().reset_index(name='value')
+            src_len['source_col'] = src_len['Source'] + ' (Manba)'
+            src_len['target_col'] = src_len['Uzunlik'] + ' (Hajm)'
+            
+            # 2. Uzunlik to Sentiment
+            len_sent = l_df.groupby(['Uzunlik', 'content sentiment analyse']).size().reset_index(name='value')
+            len_sent['source_col'] = len_sent['Uzunlik'] + ' (Hajm)'
+            len_sent['target_col'] = len_sent['content sentiment analyse'] + ' (Hissiyot)'
+            
+            links_l_df = pd.concat([
+                src_len[['source_col', 'target_col', 'value']], 
+                len_sent[['source_col', 'target_col', 'value']]
+            ], ignore_index=True)
+            
+            l_nodes = list(pd.unique(links_l_df[['source_col', 'target_col']].values.ravel('K')))
+            l_node_mapping = {node: i for i, node in enumerate(l_nodes)}
+            
+            l_source_indices = links_l_df['source_col'].map(l_node_mapping).tolist()
+            l_target_indices = links_l_df['target_col'].map(l_node_mapping).tolist()
+            l_values = links_l_df['value'].tolist()
+            
+            l_node_colors = []
+            l_x_pos, l_y_pos = [], []
+            for n in l_nodes:
+                if 'Positive' in n: 
+                    l_node_colors.append('#659961')
+                    l_x_pos.append(0.99); l_y_pos.append(0.1)
+                elif 'Neutral' in n: 
+                    l_node_colors.append('#A6A6A6')
+                    l_x_pos.append(0.99); l_y_pos.append(0.5)
+                elif 'Negative' in n: 
+                    l_node_colors.append('#F2930B')
+                    l_x_pos.append(0.99); l_y_pos.append(0.9)
+                elif ' (Manba)' in n: 
+                    l_node_colors.append('#3475B5')
+                    l_x_pos.append(0.01); l_y_pos.append(0.5)
+                else: 
+                    l_node_colors.append('#D2A14E')
+                    l_x_pos.append(0.5); l_y_pos.append(0.5)
+            
+            try:
+                fig_sankey_len = go.Figure(data=[go.Sankey(
+                    arrangement="snap",
+                    textfont=dict(color="black", size=13),
+                    node = dict(
+                      pad = 20, thickness = 25,
+                      line = dict(color = "white", width = 0.5),
+                      label = [f"<b>{n.replace(' (Manba)', '').replace(' (Hajm)', '').replace(' (Hissiyot)', '')}</b>" for n in l_nodes],
+                      color = l_node_colors,
+                      x = l_x_pos, y = l_y_pos
+                    ),
+                    link = dict(
+                      source = l_source_indices, target = l_target_indices, value = l_values,
+                      color = "rgba(166, 166, 166, 0.4)" 
+                    )
+                )])
+                fig_sankey_len.update_layout(title_text="Yangilik hajmining manbalar va hissiyotlar bo'yicha tarqalishi", font_size=12, height=500)
+                st.plotly_chart(fig_sankey_len, use_container_width=True, config=dl_config)
+            except Exception as e:
+                st.error("Dinamika diagrammasini tuzishda xatolik yuz berdi.")
+        elif 'content length' in df.columns:
             fig_len = px.histogram(df, x='content length', nbins=50, title="Maqolalar Uzunligi Taqsimoti (Belgilar Soni)", color_discrete_sequence=['#659961'])
             st.plotly_chart(fig_len, use_container_width=True, config=dl_config)
 
