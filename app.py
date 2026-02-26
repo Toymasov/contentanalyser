@@ -498,11 +498,11 @@ if df is not None:
                 if len(hex_color) != 6: return f"rgba(166,166,166,{opacity})"
                 return f"rgba({int(hex_color[0:2], 16)}, {int(hex_color[2:4], 16)}, {int(hex_color[4:6], 16)}, {opacity})"
 
-            # Dinamik Chiziqlar Rangi (Manbaga asoslangan - Source Based Coloring)
+            # Dinamik Chiziqlar Rangi (Manzilga asoslangan - Target Based Coloring)
             link_colors_arr = []
             for _, row in links_df.iterrows():
-                s_col = row['source_col']
-                link_colors_arr.append(get_rgba(node_color_map.get(s_col, '#A6A6A6'), 0.45))
+                t_col = row['target_col']
+                link_colors_arr.append(get_rgba(node_color_map.get(t_col, '#A6A6A6'), 0.45))
 
             try:
                 fig_sankey = go.Figure(data=[go.Sankey(
@@ -609,11 +609,11 @@ if df is not None:
                 if len(hex_color) != 6: return f"rgba(166,166,166,{opacity})"
                 return f"rgba({int(hex_color[0:2], 16)}, {int(hex_color[2:4], 16)}, {int(hex_color[4:6], 16)}, {opacity})"
 
-            # Dinamik Chiziqlar Rangi (Source Based Aesthetics)
+            # Dinamik Chiziqlar Rangi (Target Based Aesthetics)
             l_link_colors_arr = []
             for _, row in links_l_df.iterrows():
-                s_col = row['source_col']
-                l_link_colors_arr.append(get_rgba_2(l_node_color_map.get(s_col, '#A6A6A6'), 0.45))
+                t_col = row['target_col']
+                l_link_colors_arr.append(get_rgba_2(l_node_color_map.get(t_col, '#A6A6A6'), 0.45))
 
             try:
                 fig_sankey_len = go.Figure(data=[go.Sankey(
