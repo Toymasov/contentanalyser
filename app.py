@@ -319,7 +319,7 @@ if df is not None:
             main_ts_df, x='Sana', y='Soni', color='Source',
             title="Kunlik chop etilgan yangiliklar soni (Kanal va Saytlar kesimida)",
             markers=True, line_shape="spline",
-            color_discrete_sequence=['#659961', '#F2930B', '#A6A6A6', '#3475B5', '#D2A14E', '#8E6C8A', '#528E8C', '#B56B5D']
+            color_discrete_sequence=['#659961', '#F2930B', '#A6A6A6', '#C86B5E', '#D2A14E', '#8E6C8A', '#528E8C', '#B56B5D']
         )
         st.plotly_chart(fig_main_ts, use_container_width=True, config=dl_config)
         st.markdown("---")
@@ -376,7 +376,7 @@ if df is not None:
                 if not v_df.empty:
                     vic = v_df['violence victim type'].value_counts().reset_index()
                     vic.columns = ['Qurbon', 'Soni']
-                    fig_vic = px.pie(vic, values='Soni', names='Qurbon', title="Qurbonlar Toifasi", hole=0.3, color_discrete_sequence=['#F2930B', '#A6A6A6', '#659961', '#3475B5', '#D2A14E'])
+                    fig_vic = px.pie(vic, values='Soni', names='Qurbon', title="Qurbonlar Toifasi", hole=0.3, color_discrete_sequence=['#F2930B', '#A6A6A6', '#659961', '#C86B5E', '#D2A14E'])
                     st.plotly_chart(fig_vic, use_container_width=True, config=dl_config)
                 else: st.info("Qurbonlar haqida ma'lumot topilmadi.")
         if has_perp:
@@ -400,7 +400,7 @@ if df is not None:
             if has_news_type:
                 nc = df['news type'].value_counts().reset_index()
                 nc.columns = ['Tur', 'Soni']
-                fig_n = px.pie(nc, values='Soni', names='Tur', title="Yangiliklarning Umumiy Taqsimoti", hole=0.5, color_discrete_sequence=['#659961', '#F2930B', '#A6A6A6', '#3475B5', '#D2A14E'])
+                fig_n = px.pie(nc, values='Soni', names='Tur', title="Yangiliklarning Umumiy Taqsimoti", hole=0.5, color_discrete_sequence=['#659961', '#F2930B', '#A6A6A6', '#C86B5E', '#D2A14E'])
                 fig_n.update_traces(textposition='inside', textinfo='percent+label')
                 st.plotly_chart(fig_n, use_container_width=True, config=dl_config)
         with ncol2:
@@ -490,7 +490,7 @@ if df is not None:
                     else: # Boshqa yoki boshqalar
                         c = '#41aba0'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.9)
                 else: 
-                    c = '#3475B5'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.5)
+                    c = '#C86B5E'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.5)
 
             # Funksiya: Hex ni RGBA shaffof rangiga aylantirish
             def get_rgba(hex_color, opacity=0.35):
@@ -537,7 +537,7 @@ if df is not None:
         if 'parsed_date' in df.columns and not df['parsed_date'].isna().all():
             if has_news_type:
                 time_df = df.groupby([df['parsed_date'].dt.date, 'news type']).size().reset_index(name='Soni')
-                fig_time = px.line(time_df, x='parsed_date', y='Soni', color='news type', title="Turkumlar Bo'yicha O'sish", markers=True, color_discrete_sequence=['#659961', '#F2930B', '#A6A6A6', '#3475B5', '#D2A14E'])
+                fig_time = px.line(time_df, x='parsed_date', y='Soni', color='news type', title="Turkumlar Bo'yicha O'sish", markers=True, color_discrete_sequence=['#659961', '#F2930B', '#A6A6A6', '#C86B5E', '#D2A14E'])
                 st.plotly_chart(fig_time, use_container_width=True, config=dl_config)
         if 'content length' in df.columns and 'Source' in df.columns and has_content_sentiment:
             st.markdown("---")
