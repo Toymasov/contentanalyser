@@ -457,6 +457,9 @@ if df is not None:
             target_indices = links_df['target_col'].map(node_mapping).tolist()
             values = links_df['value'].tolist()
             
+            manba_nodes = [n for n in all_nodes if ' (Manba)' in n]
+            tur_nodes = [n for n in all_nodes if ' (Tur)' in n]
+            
             # Ranglarni va tartibini belgilash (x, y koordinatalari bilan)
             node_colors = []
             x_pos = []
@@ -473,7 +476,14 @@ if df is not None:
                     x_pos.append(0.99); y_pos.append(0.9)
                 elif ' (Manba)' in n: 
                     node_colors.append('#3475B5')
-                    x_pos.append(0.01); y_pos.append(0.5)
+                    x_pos.append(0.01)
+                    if len(manba_nodes) == 1: y_pos.append(0.5)
+                    else: y_pos.append(0.01 + 0.98 * (manba_nodes.index(n) / (len(manba_nodes) - 1)))
+                elif ' (Tur)' in n:
+                    node_colors.append('#3475B5')
+                    x_pos.append(0.5)
+                    if len(tur_nodes) == 1: y_pos.append(0.5)
+                    else: y_pos.append(0.01 + 0.98 * (tur_nodes.index(n) / (len(tur_nodes) - 1)))
                 else: 
                     node_colors.append('#3475B5')
                     x_pos.append(0.5); y_pos.append(0.5)
@@ -547,6 +557,8 @@ if df is not None:
             l_target_indices = links_l_df['target_col'].map(l_node_mapping).tolist()
             l_values = links_l_df['value'].tolist()
             
+            l_manba_nodes = [n for n in l_nodes if ' (Manba)' in n]
+            
             l_node_colors = []
             l_x_pos, l_y_pos = [], []
             for n in l_nodes:
@@ -561,7 +573,21 @@ if df is not None:
                     l_x_pos.append(0.99); l_y_pos.append(0.9)
                 elif ' (Manba)' in n: 
                     l_node_colors.append('#3475B5')
-                    l_x_pos.append(0.01); l_y_pos.append(0.5)
+                    l_x_pos.append(0.01)
+                    if len(l_manba_nodes) == 1: l_y_pos.append(0.5)
+                    else: l_y_pos.append(0.01 + 0.98 * (l_manba_nodes.index(n) / (len(l_manba_nodes) - 1)))
+                elif 'Qisqa' in n:
+                    l_node_colors.append('#D2A14E')
+                    l_x_pos.append(0.5); l_y_pos.append(0.1)
+                elif "O'rtacha" in n:
+                    l_node_colors.append('#D2A14E')
+                    l_x_pos.append(0.5); l_y_pos.append(0.4)
+                elif 'Uzun' in n and 'Juda' not in n:
+                    l_node_colors.append('#D2A14E')
+                    l_x_pos.append(0.5); l_y_pos.append(0.7)
+                elif 'Juda Uzun' in n:
+                    l_node_colors.append('#D2A14E')
+                    l_x_pos.append(0.5); l_y_pos.append(0.95)
                 else: 
                     l_node_colors.append('#D2A14E')
                     l_x_pos.append(0.5); l_y_pos.append(0.5)
