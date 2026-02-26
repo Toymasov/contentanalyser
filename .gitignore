@@ -1,0 +1,11 @@
+venv/
+.venv/
+__pycache__/
+temp_gabriel/
+gabriel_runs/
+run_dashboard.py
+test_profiler.py
+test_timer.py
+.env
+*.csv
+*test*.py
