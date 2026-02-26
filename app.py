@@ -461,41 +461,42 @@ if df is not None:
             tur_nodes = [n for n in all_nodes if ' (Tur)' in n]
             
             # Ranglarni va tartibini belgilash (x, y koordinatalari bilan)
+            premium_colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#4A90E2', '#BD10E0', '#FF847C']
             node_colors = []
             x_pos = []
             y_pos = []
+            node_color_map = {}
             for n in all_nodes:
                 if 'Positive' in n: 
-                    node_colors.append('#659961')
-                    x_pos.append(0.99); y_pos.append(0.1)
+                    c = '#388E3C'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.99); y_pos.append(0.1)
                 elif 'Neutral' in n: 
-                    node_colors.append('#A6A6A6')
-                    x_pos.append(0.99); y_pos.append(0.5)
+                    c = '#9E9E9E'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.99); y_pos.append(0.5)
                 elif 'Negative' in n: 
-                    node_colors.append('#F2930B')
-                    x_pos.append(0.99); y_pos.append(0.9)
+                    c = '#D32F2F'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.99); y_pos.append(0.9)
                 elif ' (Manba)' in n: 
-                    node_colors.append('#3475B5')
-                    x_pos.append(0.01)
+                    c = premium_colors[manba_nodes.index(n) % len(premium_colors)]
+                    node_colors.append(c); node_color_map[n] = c; x_pos.append(0.01)
                     if len(manba_nodes) == 1: y_pos.append(0.5)
                     else: y_pos.append(0.01 + 0.98 * (manba_nodes.index(n) / (len(manba_nodes) - 1)))
                 elif ' (Tur)' in n:
-                    node_colors.append('#3475B5')
-                    x_pos.append(0.5)
+                    c = premium_colors[(len(manba_nodes) + tur_nodes.index(n)) % len(premium_colors)]
+                    node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5)
                     if len(tur_nodes) == 1: y_pos.append(0.5)
                     else: y_pos.append(0.01 + 0.98 * (tur_nodes.index(n) / (len(tur_nodes) - 1)))
                 else: 
-                    node_colors.append('#3475B5')
-                    x_pos.append(0.5); y_pos.append(0.5)
+                    c = '#3475B5'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.5)
 
-            # Dinamik Chiziqlar Rangi (Manzilga asoslangan - Target Based Coloring)
+            # Funksiya: Hex ni RGBA shaffof rangiga aylantirish
+            def get_rgba(hex_color, opacity=0.35):
+                hex_color = hex_color.lstrip('#')
+                if len(hex_color) != 6: return f"rgba(166,166,166,{opacity})"
+                return f"rgba({int(hex_color[0:2], 16)}, {int(hex_color[2:4], 16)}, {int(hex_color[4:6], 16)}, {opacity})"
+
+            # Dinamik Chiziqlar Rangi (Manbaga asoslangan - Source Based Coloring)
             link_colors_arr = []
             for _, row in links_df.iterrows():
-                t_col = row['target_col']
-                if 'Positive' in t_col: link_colors_arr.append('rgba(101, 153, 97, 0.4)') # Yashil (Positive)
-                elif 'Negative' in t_col: link_colors_arr.append('rgba(242, 147, 11, 0.4)') # Zargaldoq (Negative)
-                elif 'Neutral' in t_col: link_colors_arr.append('rgba(166, 166, 166, 0.4)') # Kulrang (Neutral)
-                else: link_colors_arr.append('rgba(52, 117, 181, 0.25)') # Ko'kish (Manbalar uchun)
+                s_col = row['source_col']
+                link_colors_arr.append(get_rgba(node_color_map.get(s_col, '#A6A6A6'), 0.45))
 
             try:
                 fig_sankey = go.Figure(data=[go.Sankey(
@@ -568,47 +569,45 @@ if df is not None:
             
             l_manba_nodes = [n for n in l_nodes if ' (Manba)' in n]
             
+            # Preimum ranglar palitrasi
+            premium_colors_2 = ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#4A90E2', '#BD10E0', '#FF847C', '#91cc75']
+            
             l_node_colors = []
             l_x_pos, l_y_pos = [], []
+            l_node_color_map = {}
             for n in l_nodes:
                 if 'Positive' in n: 
-                    l_node_colors.append('#659961')
-                    l_x_pos.append(0.99); l_y_pos.append(0.1)
+                    c = '#388E3C'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.99); l_y_pos.append(0.1)
                 elif 'Neutral' in n: 
-                    l_node_colors.append('#A6A6A6')
-                    l_x_pos.append(0.99); l_y_pos.append(0.5)
+                    c = '#9E9E9E'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.99); l_y_pos.append(0.5)
                 elif 'Negative' in n: 
-                    l_node_colors.append('#F2930B')
-                    l_x_pos.append(0.99); l_y_pos.append(0.9)
+                    c = '#D32F2F'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.99); l_y_pos.append(0.9)
                 elif ' (Manba)' in n: 
-                    l_node_colors.append('#3475B5')
-                    l_x_pos.append(0.01)
+                    c = premium_colors_2[l_manba_nodes.index(n) % len(premium_colors_2)]
+                    l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.01)
                     if len(l_manba_nodes) == 1: l_y_pos.append(0.5)
                     else: l_y_pos.append(0.01 + 0.98 * (l_manba_nodes.index(n) / (len(l_manba_nodes) - 1)))
                 elif 'Qisqa' in n:
-                    l_node_colors.append('#D2A14E')
-                    l_x_pos.append(0.5); l_y_pos.append(0.1)
+                    c = '#fc8452'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.5); l_y_pos.append(0.1)
                 elif "O'rtacha" in n:
-                    l_node_colors.append('#D2A14E')
-                    l_x_pos.append(0.5); l_y_pos.append(0.4)
+                    c = '#9a60b4'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.5); l_y_pos.append(0.4)
                 elif 'Uzun' in n and 'Juda' not in n:
-                    l_node_colors.append('#D2A14E')
-                    l_x_pos.append(0.5); l_y_pos.append(0.7)
+                    c = '#ea7ccc'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.5); l_y_pos.append(0.7)
                 elif 'Juda Uzun' in n:
-                    l_node_colors.append('#D2A14E')
-                    l_x_pos.append(0.5); l_y_pos.append(0.95)
+                    c = '#3ba272'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.5); l_y_pos.append(0.95)
                 else: 
-                    l_node_colors.append('#D2A14E')
-                    l_x_pos.append(0.5); l_y_pos.append(0.5)
+                    c = '#D2A14E'; l_node_colors.append(c); l_node_color_map[n] = c; l_x_pos.append(0.5); l_y_pos.append(0.5)
             
-            # Dinamik Chiziqlar Rangi (Target Based)
+            def get_rgba_2(hex_color, opacity=0.35):
+                hex_color = hex_color.lstrip('#')
+                if len(hex_color) != 6: return f"rgba(166,166,166,{opacity})"
+                return f"rgba({int(hex_color[0:2], 16)}, {int(hex_color[2:4], 16)}, {int(hex_color[4:6], 16)}, {opacity})"
+
+            # Dinamik Chiziqlar Rangi (Source Based Aesthetics)
             l_link_colors_arr = []
             for _, row in links_l_df.iterrows():
-                t_col = row['target_col']
-                if 'Positive' in t_col: l_link_colors_arr.append('rgba(101, 153, 97, 0.4)')
-                elif 'Negative' in t_col: l_link_colors_arr.append('rgba(242, 147, 11, 0.4)')
-                elif 'Neutral' in t_col: l_link_colors_arr.append('rgba(166, 166, 166, 0.4)')
-                else: l_link_colors_arr.append('rgba(210, 161, 78, 0.3)')
+                s_col = row['source_col']
+                l_link_colors_arr.append(get_rgba_2(l_node_color_map.get(s_col, '#A6A6A6'), 0.45))
 
             try:
                 fig_sankey_len = go.Figure(data=[go.Sankey(
