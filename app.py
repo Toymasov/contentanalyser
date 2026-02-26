@@ -488,6 +488,15 @@ if df is not None:
                     node_colors.append('#3475B5')
                     x_pos.append(0.5); y_pos.append(0.5)
 
+            # Dinamik Chiziqlar Rangi (Manzilga asoslangan - Target Based Coloring)
+            link_colors_arr = []
+            for _, row in links_df.iterrows():
+                t_col = row['target_col']
+                if 'Positive' in t_col: link_colors_arr.append('rgba(101, 153, 97, 0.4)') # Yashil (Positive)
+                elif 'Negative' in t_col: link_colors_arr.append('rgba(242, 147, 11, 0.4)') # Zargaldoq (Negative)
+                elif 'Neutral' in t_col: link_colors_arr.append('rgba(166, 166, 166, 0.4)') # Kulrang (Neutral)
+                else: link_colors_arr.append('rgba(52, 117, 181, 0.25)') # Ko'kish (Manbalar uchun)
+
             try:
                 fig_sankey = go.Figure(data=[go.Sankey(
                     arrangement="snap",
@@ -505,7 +514,7 @@ if df is not None:
                       source = source_indices,
                       target = target_indices,
                       value = values,
-                      color = "rgba(166, 166, 166, 0.4)" 
+                      color = link_colors_arr 
                     ))])
                 
                 fig_sankey.update_layout(title_text="Axborot tarqalish hamda kayfiyat o'zgarish oqimi", font_size=12, height=500)
@@ -592,6 +601,15 @@ if df is not None:
                     l_node_colors.append('#D2A14E')
                     l_x_pos.append(0.5); l_y_pos.append(0.5)
             
+            # Dinamik Chiziqlar Rangi (Target Based)
+            l_link_colors_arr = []
+            for _, row in links_l_df.iterrows():
+                t_col = row['target_col']
+                if 'Positive' in t_col: l_link_colors_arr.append('rgba(101, 153, 97, 0.4)')
+                elif 'Negative' in t_col: l_link_colors_arr.append('rgba(242, 147, 11, 0.4)')
+                elif 'Neutral' in t_col: l_link_colors_arr.append('rgba(166, 166, 166, 0.4)')
+                else: l_link_colors_arr.append('rgba(210, 161, 78, 0.3)')
+
             try:
                 fig_sankey_len = go.Figure(data=[go.Sankey(
                     arrangement="snap",
@@ -605,7 +623,7 @@ if df is not None:
                     ),
                     link = dict(
                       source = l_source_indices, target = l_target_indices, value = l_values,
-                      color = "rgba(166, 166, 166, 0.4)" 
+                      color = l_link_colors_arr 
                     )
                 )])
                 fig_sankey_len.update_layout(title_text="Yangilik hajmining manbalar va hissiyotlar bo'yicha tarqalishi", font_size=12, height=500)
