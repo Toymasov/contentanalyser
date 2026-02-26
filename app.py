@@ -479,16 +479,16 @@ if df is not None:
                     if len(manba_nodes) == 1: y_pos.append(0.5)
                     else: y_pos.append(0.01 + 0.98 * (manba_nodes.index(n) / (len(manba_nodes) - 1)))
                 elif ' (Tur)' in n:
-                    if 'Voqea' in n:
-                        c = '#f47a61'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.1)
+                    if "Noma'lum" in n:
+                        c = '#9E9E9E'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.1)
+                    elif 'Voqea' in n:
+                        c = '#f47a61'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.3)
                     elif 'Analitics' in n:
-                        c = '#7ea5dd'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.35)
+                        c = '#7ea5dd'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.5)
                     elif 'Qonun' in n:
-                        c = '#e0bd62'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.6)
-                    elif 'Boshqa' in n:
-                        c = '#41aba0'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.8)
-                    else: # Noma'lum yoki boshqalar
-                        c = '#9E9E9E'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.95)
+                        c = '#e0bd62'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.7)
+                    else: # Boshqa yoki boshqalar
+                        c = '#41aba0'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.9)
                 else: 
                     c = '#3475B5'; node_colors.append(c); node_color_map[n] = c; x_pos.append(0.5); y_pos.append(0.5)
 
