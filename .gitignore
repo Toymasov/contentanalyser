@@ -7,5 +7,4 @@ run_dashboard.py
 test_profiler.py
 test_timer.py
 .env
-*.csv
 *test*.py
