@@ -209,6 +209,19 @@ if df is not None:
     if has_violence:
         df['violence analyse'] = df['violence analyse'].apply(clean_array_brackets)
 
+    # --- SITE INFO ---
+    with st.sidebar.expander("ℹ️ Sayt ma‘lumotnomasi", expanded=False):
+        st.markdown("### Loyiha haqida qisqacha ma'lumot")
+        st.write("Mazkur tahliliy platforma ommaviy axborot vositalaridagi, xususan, turli Telegram kanallari va veb-saytlardagi o'zbek tilidagi yangiliklarni aqlli tahlil qilish uchun mo'ljallangan. Tizim yordamida har bir yangilikning tarkibidagi hissiyot, zo'ravonlik elementlari o'rganilib, umumiy statistika, matn uzunligi, vaqt dinamikasi hamda ko'p qo'llanilgan so'zlar o'rtasidagi mantiqiy bog'lanish chizmalari taqdim etiladi.")
+        
+        st.markdown("### Hissiyotlar (Sentiments) qanday tasniflanadi?")
+        st.info("**Hissiyot (Sentiment)** - berilgan xabarda o'z ifodasini topgan kayfiyat va umumiy ohangni (ijobiy yoki salbiy yondashuvni) anglatadi. Hissiyotlar asosan 3 turda ifodalanadi:")
+        st.markdown("""
+* **Positive (Ijobiy)**: Yangilik matnida ko'tarinki ruh, yutuqlar, xursandchilik, rivojlanish va umidbaxsh kayfiyat aks etgan holatlar.
+* **Neutral (Neytral)**: Yangilik asosan axborot yetkazish xususiyatiga ega, hissiy bo'yoqdan xoli va xolis ifodalangan (faktlar ustiga qurilgan) xabarlar.
+* **Negative (Salbiy)**: Yangilik matnida muammolar, baxtsiz hodisalar, qoidabuzarliklar, qayg'u, xavotir yoki salbiy oqibatlar ifodalangan holatlar.
+        """)
+
     # --- SIDEBAR FILTERS ---
     st.sidebar.header("🔍 Filtrlash Sozlamalari")
     
