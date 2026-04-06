@@ -99,79 +99,74 @@ async def main():
             # yuborgani uchun, ularni 'Yo'q' qatorlar o'rniga yozib qo'yayotgan edi. Asl indexlarni asrab qolamiz.
             original_indices = df_violence.index
             
-            # --- 5.1 QURBONLAR TOIFASI ---
-            # Ushbu jadval faqat Bor deb topilgan jinoyatlarda ishlagani sababli "Yo'q" bandi olib tashlandi
+            # --- 3 ta classify PARALLEL ishlaydi (asyncio.gather) ---
+            # Ular mustaqil, shuning uchun bir vaqtda yuborish ~3x tezroq.
             violence_labels = {
                 "Ayollarga nisbatan": "Zo'ravonlik asosan ayollarga nisbatan ishlatilgan.",
                 "Bolalarga nisbatan": "Zo'ravonlik asosan yosh bolalarga nisbatan ishlatilgan.",
                 "Ayollar va bolalarga nisbatan": "Zo'ravonlik ham ayollarga, ham bolalarga nisbatan ishlatilgan.",
                 "Boshqa": "Zo'ravonlik qurbonlari yuqoridagi toifalarga kirmaydi (masalan, erkaklar o'rtasidagi janjal, hayvonlarga nisbatan va h.k)."
             }
-            
-            df_violence_victim = await gabriel.classify(
-                df=df_violence.copy(),
-                column_name="Main_Text_For_AI",
-                labels=violence_labels,
-                save_dir=os.path.join(save_directory, "classify_violence"),
-                model="gpt-4o-mini",
-                n_parallels=10, 
-                file_name="classify_violence.csv",
-                reset_files=True,  # Oldingi tahlildan qolib ketgan "Yo'q" degan kesh xatosi uchun Tozalab yozish shart!
-                additional_instructions="Faqat qat'iyan bitta toifani tanla, ikkita toifa bo'lmasin. Faqat bittasini tanlang."
-            )
-            
-            if 'predicted_classes' in df_violence_victim.columns:
-                df_violence_victim.rename(columns={'predicted_classes': 'violence victim type'}, inplace=True)
-                df_violence['violence victim type'] = df_violence_victim['violence victim type'].values
-                
-            # --- 5.2 ZO'RAVONLIK GEOGRAFIYASI ---
-            # [PROMPT YECHIMI]: AI chalg'imasligi uchun O'zbekiston/Xorij shartini juda qattiq qildik.
             geo_labels = {
                 "O'zbekiston": "Faqat va faqat voqea O'zbekiston Respublikasi hududida yoki uning viloyatlarida (Toshkent, Samarqand va h.k) sodir bo'lganligi matnda ochiq aytilsagina shu toifani tanla.",
                 "Xorij": "Voqea O'zbekistonga aloqador emas. Har qanday dunyo yangiliklari, xorijiy davlatlar (Rossiya, AQSH, qo'shni davlatlar) yoki umuman qayerdaligi aniq yozilmagan bo'lsa darhol faqat shu 'Xorij' toifasini tanla."
             }
-            
-            df_violence_geo = await gabriel.classify(
-                df=df_violence.copy(),
-                column_name="Main_Text_For_AI",
-                labels=geo_labels,
-                save_dir=os.path.join(save_directory, "classify_geo"),
-                model="gpt-4o-mini",
-                n_parallels=10, 
-                file_name="classify_geo.csv",
-                reset_files=True,
-                additional_instructions="Diqqat: Matnni o'qi, agar O'ZBEKISTON dagi voqea ekanligi yaqqol yozilmagan bo'lsa, avtomatik ravishda 'Xorij' ni tanla. Ikkita tanlov bo'lmasin. Faqat bittasini tanlang."
-            )
-            
-            if 'predicted_classes' in df_violence_geo.columns:
-                df_violence_geo.rename(columns={'predicted_classes': 'violence location'}, inplace=True)
-                df_violence['violence location'] = df_violence_geo['violence location'].values
-                
-            # --- 5.3 YANGILIK TURLARI ---
-            print("3-BOSQICH: Yangiliklarni contentga ko'ra tasniflash ham 'Bor' qatorlar uchun... ")
             news_labels = {
                 "Qonun-qarorlar (Law)": "Matn qonunchilikdagi o'zgarishlar, sud qarorlari, prezident yoki hukumat farmonlari haqida.",
                 "Voqea-hodisa": "Muayyan bo'lib o'tgan jinoyat, baxtsiz hodisa yoki kundalik xabarlar (kriminalistika, YTH).",
                 "Analitics/Tahliliy": "Muammoni sabablari, statistikasi va ijtimoiy kelib chiqishi chuqur o'rganilgan tahliliy maqola.",
                 "Boshqa/Umumiy": "Yuqoridagi toifalarga mos kelmaydigan umumiy xabar."
             }
-            
-            df_violence_news = await gabriel.classify(
-                df=df_violence.copy(),
-                column_name="Main_Text_For_AI",
-                labels=news_labels,
-                save_dir=os.path.join(save_directory, "classify_news"),
-                model="gpt-4o-mini",
-                n_parallels=10, 
-                file_name="classify_news.csv",
-                reset_files=True,
-                additional_instructions="Faqat qat'iyan bitta toifani tanla, ikkita toifa bo'lmasin. Faqat bittasini tanlang."
+
+            print("\n2-BOSQICH: 3 ta tasnif PARALLEL boshlanmoqda (qurbonlar + geografiya + yangilik turi)...")
+            df_violence_victim, df_violence_geo, df_violence_news = await asyncio.gather(
+                gabriel.classify(
+                    df=df_violence.copy(),
+                    column_name="Main_Text_For_AI",
+                    labels=violence_labels,
+                    save_dir=os.path.join(save_directory, "classify_violence"),
+                    model="gpt-4o-mini",
+                    n_parallels=20,
+                    file_name="classify_violence.csv",
+                    reset_files=False,  # False = to'xtatib qayta ishga tushirilsa davom etadi
+                    additional_instructions="Faqat qat'iyan bitta toifani tanla, ikkita toifa bo'lmasin. Faqat bittasini tanlang."
+                ),
+                gabriel.classify(
+                    df=df_violence.copy(),
+                    column_name="Main_Text_For_AI",
+                    labels=geo_labels,
+                    save_dir=os.path.join(save_directory, "classify_geo"),
+                    model="gpt-4o-mini",
+                    n_parallels=20,
+                    file_name="classify_geo.csv",
+                    reset_files=False,  # False = to'xtatib qayta ishga tushirilsa davom etadi
+                    additional_instructions="Diqqat: Matnni o'qi, agar O'ZBEKISTON dagi voqea ekanligi yaqqol yozilmagan bo'lsa, avtomatik ravishda 'Xorij' ni tanla. Ikkita tanlov bo'lmasin. Faqat bittasini tanlang."
+                ),
+                gabriel.classify(
+                    df=df_violence.copy(),
+                    column_name="Main_Text_For_AI",
+                    labels=news_labels,
+                    save_dir=os.path.join(save_directory, "classify_news"),
+                    model="gpt-4o-mini",
+                    n_parallels=20,
+                    file_name="classify_news.csv",
+                    reset_files=False,  # False = to'xtatib qayta ishga tushirilsa davom etadi
+                    additional_instructions="Faqat qat'iyan bitta toifani tanla, ikkita toifa bo'lmasin. Faqat bittasini tanlang."
+                )
             )
-            
+
+            if 'predicted_classes' in df_violence_victim.columns:
+                df_violence_victim.rename(columns={'predicted_classes': 'violence victim type'}, inplace=True)
+                df_violence['violence victim type'] = df_violence_victim['violence victim type'].values
+
+            if 'predicted_classes' in df_violence_geo.columns:
+                df_violence_geo.rename(columns={'predicted_classes': 'violence location'}, inplace=True)
+                df_violence['violence location'] = df_violence_geo['violence location'].values
+
             if 'predicted_classes' in df_violence_news.columns:
                 df_violence_news.rename(columns={'predicted_classes': 'news type'}, inplace=True)
                 df_violence['news type'] = df_violence_news['news type'].values
-                
+
             # Asl indexlarni joyiga qaytarib ulash
             df_violence.index = original_indices
             
